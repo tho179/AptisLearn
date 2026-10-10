@@ -85,6 +85,8 @@
         #ab-origin { background: #7f8c8d; }
         #ab-para { background: #16a085; }
         #ab-para.on { background: #e67e22; }
+        #ab-reset { background: #c0392b; }
+        .reset-btn { background-color: #c0392b !important; }
         .para-note { margin-top: 10px; font-size: 13px; font-weight: 600; color: #7e5109; background: #fef9e7; border: 1px solid #f9e79f; border-radius: 5px; padding: 8px 10px; }
         .right-panel .check-btn { display: none; }
         @media (max-width: 900px) {
@@ -121,6 +123,7 @@
     <button id="ab-shuffle" class="ab-btn ab-shuffle"><span class="ab-ico" aria-hidden="true">🔀</span><span class="ab-txt">Xáo bài</span></button>
     <button id="ab-origin" class="ab-btn ab-origin"><span class="ab-ico" aria-hidden="true">↺</span><span class="ab-txt">Bản gốc</span></button>
     <button id="ab-para" class="ab-btn ab-para"><span class="ab-ico" aria-hidden="true">🔄</span><span class="ab-txt">Paraphrase</span></button>
+    <button id="ab-reset" class="ab-btn"><span class="ab-ico" aria-hidden="true">🧹</span><span class="ab-txt">Làm lại</span></button>
 </div>
 
 <div class="container">
@@ -398,6 +401,7 @@
         if(allCorrect && selects.length > 0) {
             setTimeout(() => alert("Chúc mừng! Bạn đã trả lời đúng toàn bộ đoạn văn trong chủ đề này!"), 200);
         }
+        if (window.__saveProg) window.__saveProg();
     }
 
     /* ===== Highlight + Vocab + Shuffle ===== */
@@ -828,9 +832,85 @@
     });
     window.__refreshActionBar = paintPara;
 
+    /* ----- Progress persistence (answers + results + tab/view) ----- */
+    // ponytail: per-device localStorage; muốn sync PC<->phone phải nâng cấp backend
+    const PROG_KEY = 'aptis_progress_v1';
+    let PROG = loadJSON(PROG_KEY, { answers: {}, checked: {}, activeTab: null, activeView: 'practice' });
+    const saveProg = () => saveJSON(PROG_KEY, PROG);
+    window.__saveProg = () => {
+        document.querySelectorAll('.tab-content').forEach(t => {
+            const ans = {}, chk = {};
+            t.querySelectorAll('.paragraph').forEach(p => {
+                const key = p.dataset.para;
+                const sel = p.querySelector('select');
+                if (sel && sel.value) ans[key] = sel.value;
+                const r = p.querySelector('.result');
+                if (r && r.innerHTML) chk[key] = { h: r.innerHTML, c: r.className };
+            });
+            PROG.answers[t.id] = ans;
+            PROG.checked[t.id] = chk;
+        });
+        const at = document.querySelector('.tab-content.active');
+        if (at) PROG.activeTab = at.id;
+        const nv = document.querySelector('#main-nav .nav-btn.active');
+        if (nv) PROG.activeView = nv.dataset.view;
+        saveProg();
+    };
+    function restoreProg() {
+        document.querySelectorAll('.tab-content').forEach(t => {
+            const ans = (PROG.answers || {})[t.id] || {};
+            const chk = (PROG.checked || {})[t.id] || {};
+            t.querySelectorAll('.paragraph').forEach(p => {
+                const key = p.dataset.para;
+                const sel = p.querySelector('select');
+                if (sel && ans[key]) sel.value = ans[key];
+                const r = p.querySelector('.result');
+                if (r && chk[key]) { r.innerHTML = chk[key].h; r.className = chk[key].c; }
+            });
+        });
+    }
+    function resetTopic(tid, ask) {
+        if (ask === undefined) ask = true;
+        if (ask && !confirm('Xóa hết đáp án + kết quả của đề này để làm lại?')) return;
+        PROG.answers[tid] = {};
+        PROG.checked[tid] = {};
+        saveProg();
+        const t = document.getElementById(tid);
+        if (!t) return;
+        t.querySelectorAll('.paragraph select').forEach(s => { s.value = ''; });
+        clearResults(t);
+    }
+    document.querySelectorAll('.paragraph select').forEach(sel => sel.addEventListener('change', () => window.__saveProg()));
+    document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTimeout(() => window.__saveProg(), 50)));
+    document.querySelectorAll('#main-nav .nav-btn').forEach(b => b.addEventListener('click', () => setTimeout(() => window.__saveProg(), 50)));
+    document.querySelectorAll('.tab-content .right-panel').forEach(right => {
+        if (right.querySelector('.reset-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'check-btn reset-btn';
+        btn.type = 'button';
+        btn.textContent = '🧹 Làm lại đề này';
+        btn.style.marginTop = '10px';
+        btn.addEventListener('click', () => resetTopic(activeTopic().id));
+        const check = right.querySelector('.check-btn');
+        if (check) check.after(btn);
+        else right.appendChild(btn);
+    });
+    document.querySelector('#ab-reset').addEventListener('click', () => resetTopic(activeTopic().id));
+    document.querySelector('#ab-shuffle').addEventListener('click', () => setTimeout(() => window.__saveProg(), 50));
+    document.querySelector('#ab-origin').addEventListener('click', () => setTimeout(() => window.__saveProg(), 50));
+
     applyHighlights();
     renderVocab();
     Object.keys(ORIG_BANKS).forEach(applyBank);
+    restoreProg();
+    if (PROG.activeTab && document.getElementById(PROG.activeTab)) {
+        const btn = document.querySelector('.tab-btn[onclick*="' + PROG.activeTab + '"]');
+        if (btn) btn.click();
+    }
+    if (PROG.activeView) {
+        const nb = document.querySelector('#main-nav .nav-btn[data-view="' + PROG.activeView + '"]');
+        if (nb) nb.click();
+    }
     paintPara();
 </script>
 </body>
