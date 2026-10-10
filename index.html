@@ -832,7 +832,8 @@
 
     /* ----- Progress persistence (answers + results + tab/view) ----- */
     // ponytail: per-device localStorage; muốn sync PC<->phone phải nâng cấp backend
-    const PROG_KEY = 'aptis_progress_v1';
+    // ponytail: key v2 để hủy kết quả đã lưu theo đáp án cũ (F/G topic2, A/E topic4 đã đảo); vocab/highlight giữ nguyên key riêng
+    const PROG_KEY = 'aptis_progress_v2';
     let PROG = loadJSON(PROG_KEY, { answers: {}, checked: {}, activeTab: null, activeView: 'practice' });
     const saveProg = () => saveJSON(PROG_KEY, PROG);
     window.__saveProg = () => {
