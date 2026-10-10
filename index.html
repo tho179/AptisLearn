@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aptis Reading Part 4 - Full Practice</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; background-color: #f4f6f9; color: #333; }
+        .header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 1200px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+        .tabs { display: flex; flex-wrap: wrap; border-bottom: 2px solid #e0e0e0; margin-bottom: 25px; }
+        .tab-btn { background: #f8f9fa; border: none; padding: 12px 20px; cursor: pointer; font-size: 16px; font-weight: bold; color: #555; transition: 0.3s; flex-grow: 1; text-align: center; border-radius: 8px 8px 0 0; border: 1px solid #e0e0e0; border-bottom: none; margin-right: 5px; }
+        .tab-btn:hover { background: #e9ecef; }
+        .tab-btn.active { background: #e74c3c; color: white; border-color: #e74c3c; }
+
+        .tab-content { display: none; gap: 30px; animation: fadeIn 0.4s; }
+        .tab-content.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .left-panel { flex: 1; min-width: 300px; background: #fff8e1; padding: 20px; border-radius: 8px; border-left: 5px solid #f39c12; align-self: flex-start; position: sticky; top: 20px; }
+        .right-panel { flex: 2; min-width: 500px; }
+
+        .headings-box h3 { margin-top: 0; color: #d35400; font-size: 18px; border-bottom: 1px solid #f39c12; padding-bottom: 10px;}
+        .headings-box ul { list-style-type: none; padding: 0; margin: 0; }
+        .headings-box li { margin-bottom: 10px; font-weight: 600; font-size: 15px; color: #2c3e50; background: white; padding: 10px; border-radius: 5px; border: 1px solid #e0e0e0; }
+
+        .paragraph { margin-bottom: 30px; padding: 20px; background: #ffffff; border: 1px solid #e1e8ed; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .paragraph p { margin-top: 0; font-size: 16px; text-align: justify; }
+        .paragraph-label { font-weight: bold; font-size: 18px; color: #e74c3c; margin-bottom: 10px; display: inline-block; }
+
+        select { padding: 10px; font-size: 15px; margin-top: 15px; border-radius: 5px; border: 1px solid #bdc3c7; width: 100%; background: #fdfdfd; cursor: pointer; }
+        button.check-btn { background-color: #27ae60; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; margin-top: 10px; }
+        button.check-btn:hover { background-color: #2ecc71; }
+
+        .result { font-weight: bold; margin-top: 12px; display: none; padding: 8px 12px; border-radius: 5px; text-align: center; }
+        .correct { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; display: block; }
+        .incorrect { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; display: block; }
+
+        /* --- Highlight + vocab + shuffle (added) --- */
+        .paragraph p mark.hl { background: #ffe066; padding: 0 2px; border-radius: 3px; cursor: pointer; }
+        .paragraph p mark.hl:hover { background: #ffd43b; }
+        #sel-toolbar { position: fixed; z-index: 1000; display: none; gap: 6px; background: #2c3e50; padding: 6px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+        #sel-toolbar button { border: none; border-radius: 5px; padding: 8px 12px; font-size: 14px; font-weight: bold; cursor: pointer; color: white; }
+        #sel-toolbar .tb-hl { background: #f39c12; }
+        #sel-toolbar .tb-vocab { background: #2980b9; }
+        #main-nav { max-width: 1200px; margin: 20px auto 0 auto; padding: 0 25px; display: flex; gap: 8px; }
+        #main-nav .nav-btn { flex: 1; border: 1px solid #e0e0e0; background: white; padding: 12px; font-size: 16px; font-weight: bold; color: #555; border-radius: 8px; cursor: pointer; }
+        #main-nav .nav-btn.active { background: #2c3e50; color: white; border-color: #2c3e50; }
+        #vocab-view .vv-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+        #vocab-view .vv-search { flex: 2; min-width: 180px; padding: 10px; font-size: 15px; border-radius: 5px; border: 1px solid #bdc3c7; }
+        #vocab-view .vv-filter { flex: 1; min-width: 140px; padding: 10px; font-size: 15px; border-radius: 5px; border: 1px solid #bdc3c7; margin-top: 0; width: auto; }
+        #vocab-view .vv-btn { border: none; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; color: white; background: #2980b9; }
+        #vocab-view .vv-clear { background: #e0e0e0; color: #555; }
+        #vocab-view h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 17px; }
+        #vocab-view ul { list-style: none; padding: 0; margin: 0; }
+        #vocab-view li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: white; border: 1px solid #e0e0e0; border-radius: 5px; margin-bottom: 8px; font-size: 15px; }
+        #vocab-view .vw-word { font-weight: bold; color: #c0392b; }
+        #vocab-view .vw-topic { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; }
+        #vocab-view .vw-del { border: none; background: #f8d7da; color: #721c24; border-radius: 5px; padding: 4px 10px; cursor: pointer; font-weight: bold; }
+        #vocab-view .vw-empty { color: #888; font-size: 14px; background: #f8fafc; border: 1px dashed #bdc3c7; border-radius: 8px; padding: 20px; text-align: center; }
+        .doc-card { border: 1px solid #e1e8ed; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #fff; }
+        .doc-card h3 { margin: 0 0 4px 0; color: #2c3e50; }
+        .doc-card .doc-meta { font-size: 13px; color: #888; margin-bottom: 12px; }
+        .doc-card .doc-headings { background: #fff8e1; border-left: 5px solid #f39c12; border-radius: 5px; padding: 10px 16px; margin-bottom: 12px; font-size: 14px; }
+        .doc-card .doc-para { margin-bottom: 12px; font-size: 15px; text-align: justify; }
+        .doc-card .doc-answer { display: inline-block; font-size: 13px; font-weight: bold; color: #155724; background: #d4edda; border-radius: 5px; padding: 3px 10px; margin-top: 6px; }
+        .doc-card .doc-btn { border: none; background: #2c3e50; color: white; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .doc-card .doc-toggle { background: #8e44ad; margin-right: 8px; }
+        .doc-card.hidden-answers .doc-answer { display: none; }
+        #docs-toolbar { margin-bottom: 16px; display: flex; gap: 10px; }
+        #docs-toolbar button { border: none; background: #27ae60; color: white; border-radius: 5px; padding: 12px 18px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        @media print {
+            .header, #main-nav, #practice-view, #vocab-view, #docs-toolbar, .doc-card .doc-btn, #action-bar { display: none !important; }
+            body { background: white; }
+            .container { box-shadow: none; margin: 0; max-width: none; }
+            #docs-view { display: block !important; }
+        }
+        #action-bar { position: fixed; right: 14px; top: 50%; transform: translateY(-50%); z-index: 900; display: flex; flex-direction: column; gap: 10px; }
+        #action-bar .ab-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 84px; min-height: 64px; padding: 12px 10px; border: none; border-radius: 12px; color: white; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        #action-bar .ab-btn:hover { filter: brightness(1.15); }
+        #action-bar .ab-ico { font-size: 22px; line-height: 1; }
+        #ab-check { background: #27ae60; }
+        #ab-shuffle { background: #8e44ad; }
+        #ab-origin { background: #7f8c8d; }
+        #ab-para { background: #16a085; }
+        #ab-para.on { background: #e67e22; }
+        .para-note { margin-top: 10px; font-size: 13px; font-weight: 600; color: #7e5109; background: #fef9e7; border: 1px solid #f9e79f; border-radius: 5px; padding: 8px 10px; }
+        .right-panel .check-btn { display: none; }
+        @media (max-width: 900px) {
+            #action-bar { top: auto; bottom: 12px; left: 12px; right: 12px; transform: none; flex-direction: row; }
+            #action-bar .ab-btn { flex: 1; min-width: 0; }
+        }
+        #vocab-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1100; display: none; align-items: center; justify-content: center; }
+        #vocab-modal-overlay.open { display: flex; }
+        #vocab-modal { background: white; border-radius: 10px; padding: 24px; width: 90%; max-width: 420px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+        #vocab-modal h3 { margin: 0 0 12px 0; color: #2c3e50; }
+        #vocab-modal .vm-word { font-weight: bold; color: #c0392b; background: #fdf2f2; border: 1px solid #f5c6cb; border-radius: 5px; padding: 8px 12px; margin-bottom: 12px; }
+        #vocab-modal label { font-size: 14px; font-weight: bold; color: #555; }
+        #vocab-modal input { width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; border-radius: 5px; border: 1px solid #bdc3c7; margin: 6px 0 16px 0; }
+        #vocab-modal .vm-row { display: flex; gap: 10px; }
+        #vocab-modal .vm-save { flex: 1; background: #27ae60; color: white; border: none; border-radius: 5px; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        #vocab-modal .vm-cancel { flex: 1; background: #e0e0e0; color: #555; border: none; border-radius: 5px; padding: 12px; font-size: 15px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Aptis Reading Part 4 - Paraphrased Full Texts</h1>
+    <p>Read the paragraphs and match them with the correct headings</p>
+</div>
+
+<nav id="main-nav" aria-label="Điều hướng chính">
+    <button class="nav-btn active" data-view="practice">📝 Luyện tập</button>
+    <button class="nav-btn" data-view="vocab">📚 Từ vựng <span id="nav-vocab-count">(0)</span></button>
+    <button class="nav-btn" data-view="docs">📄 Tài liệu</button>
+</nav>
+
+<div id="action-bar" aria-label="Thao tác làm bài">
+    <button id="ab-check" class="ab-btn ab-check"><span class="ab-ico" aria-hidden="true">✔</span><span class="ab-txt">Nộp bài</span></button>
+    <button id="ab-shuffle" class="ab-btn ab-shuffle"><span class="ab-ico" aria-hidden="true">🔀</span><span class="ab-txt">Xáo bài</span></button>
+    <button id="ab-origin" class="ab-btn ab-origin"><span class="ab-ico" aria-hidden="true">↺</span><span class="ab-txt">Bản gốc</span></button>
+    <button id="ab-para" class="ab-btn ab-para"><span class="ab-ico" aria-hidden="true">🔄</span><span class="ab-txt">Paraphrase</span></button>
+</div>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'topic1')">1. Women Mathematicians</button>
+        <button class="tab-btn" onclick="openTab(event, 'topic2')">2. Mountain Summits</button>
+        <button class="tab-btn" onclick="openTab(event, 'topic3')">3. Four-Day Work Week</button>
+        <button class="tab-btn" onclick="openTab(event, 'topic4')">4. Early Australia</button>
+    </div>
+
+    <!-- TOPIC 1 -->
+    <div id="topic1" class="tab-content active">
+        <div class="left-panel headings-box">
+            <h3>List of Headings</h3>
+            <ul>
+                <li>1. Gender obscures achievements</li>
+                <li>2. Acknowledging achievement of a pioneer</li>
+                <li>3. Men unfairly credited</li>
+                <li>4. A long career showing exceptional ability</li>
+                <li>5. Labels can change perspective on people</li>
+                <li>6. Attempting to create a gender balance</li>
+                <li>7. Uniformity is not always beneficial</li>
+            </ul>
+        </div>
+        <div class="right-panel">
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph A</span>
+                <p>In 2014, Iranian mathematician Maryam Mirzakhani received the prestigious Fields Prize, the highest honor in mathematics, and the first time in its 70 years that a woman has won it. For centuries, the achievements of women in mathematics were either omitted from historical records or attributed to male colleagues. Many of their contributions were later credited to male scholars. Such erasure has been a recurring theme in the history of women in this field.</p>
+                <select data-answer="1">
+                    <option value="">-- Choose matching heading --</option>
+                    <option value="1">1. Gender obscure achievements</option><option value="2">2. Acknowledging achievement of a pioneer</option><option value="3">3. Man unfairly credited</option><option value="4">4. A long career showing exceptional ability</option><option value="5">5. Labels can change perspective on people</option><option value="6">6. Attempting to create a gender balance</option><option value="7">7. Uniformity is not always an advantage</option>
+                </select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph B</span>
+                <p>Despite the many obstacles women faced in entering the field of mathematics, Sophie Germain stood out as a great female mathematician. Largely self-taught, she pursued her passion in a time when women were discouraged from academic pursuits. She made significant contributions to number theory and elasticity, and her work on Fermat's Last Theorem was particularly notable. In recognition of her groundbreaking efforts, she became the first woman to win a prize from the Paris Academy of Sciences in 1816 an award originally proposed back in 1716. This long-standing prize had never before been awarded to a woman, highlighting the importance of Germain's achievements and marking a turning point in the acknowledgment of women in science.</p>
+                <select data-answer="2"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph C</span>
+                <p>Maria Agnesi, an 18th-century Italian mathematician, was one of the first women to write a comprehensive mathematics textbook. Her work, the Instituzioni Analitiche, was highly praised and became an important reference in the study of calculus. Despite her original contributions, one of the mathematical curves she described the "Witch of Agnesi" - was mistranslated from Italian, giving it a mystical name that misrepresented her intent. Moreover, over time, credit for aspects of her work was sometimes attributed to male mathematicians who built upon her ideas. This reflects a broader pattern in history where women's intellectual achievements were overlooked or reassigned to men.</p>
+                <select data-answer="3"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph D</span>
+                <p>Millicent Fawcett demonstrated remarkable intellectual ability from a young age. At just 19, she delivered a public lecture on Sir Isaac Newton at a time when women rarely spoke in academic settings. Although she did not pursue a professional career in mathematics, her early accomplishments in the subject reflected a sharp analytical mind. Over the decades, Fawcett dedicated herself to advocating for women's education and suffrage, tirelessly working to open academic and political doors for future generations. Her lifelong commitment to intellectual and social progress stands as a testament to her exceptional capabilities and enduring influence.</p>
+                <select data-answer="4"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph E</span>
+                <p>When female mathematicians are described as "women geniuses" or "female prodigies," the gender label, while well-intended, often implies that excellence is rare among women. Such terms, though celebratory, can unintentionally reinforce the idea that women's success in mathematics is unusual, rather than simply the result of talent and hard work.</p>
+                <select data-answer="5"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph F</span>
+                <p>To address the gender imbalance in mathematics, many universities and organizations now run outreach programs, offer scholarships specifically for women, and encourage female mentorship in STEM fields. Some universities are required to arrange places where female mathematicians can work and research. These efforts aim not to give unfair advantage, but to create equal opportunities in a domain where women have historically been underrepresented.</p>
+                <select data-answer="6"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph G</span>
+                <p>In efforts to level the playing field, some institutions have implemented standardized criteria for admissions or research evaluation. However, such uniform methods can sometimes ignore the diverse paths and challenges faced by individuals, particularly women balancing academic and societal expectations. A one-size-fits-all approach may not always foster true equity.</p>
+                <select data-answer="7"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <button class="check-btn" onclick="checkAnswers('topic1')">Check Answers</button>
+        </div>
+    </div>
+
+    <!-- TOPIC 2 -->
+    <div id="topic2" class="tab-content">
+        <div class="left-panel headings-box">
+            <h3>List of Headings</h3>
+            <ul>
+                <li>1. Our changing perceptions toward mountain</li>
+                <li>2. A sense of achievement</li>
+                <li>3. Publicising one's achievements</li>
+                <li>4. A wrong priority</li>
+                <li>5. A disturbing revelation</li>
+                <li>6. A new focus on sustainability</li>
+                <li>7. An intimate relationship</li>
+            </ul>
+        </div>
+        <div class="right-panel">
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph A</span>
+                <p>The term "mountain" has evolved over time, reflecting not only physical characteristics but also cultural significance. Before the 19th century, people were quite shy when it came to conquering mountains. Today, with the development of technology, reaching the highest peaks has become easier. In contemporary discussions, mountains may symbolize challenges to overcome or destinations for adventure, transcending their geographical attributes.</p>
+                <select data-answer="1"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph B</span>
+                <p>Climbing a mountain often leads to a profound sense of accomplishment. It represents not just reaching a physical summit but also conquering personal fears and pushing one's limits, creating memories that last a lifetime. Besides, mountain climbing also creates Adrenaline - a hormone that creates a feeling of excitement like when playing other extreme sports.</p>
+                <select data-answer="2"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph C</span>
+                <p>In today's digital age, sharing achievements has become prevalent. Even before social media, documenting climbs seemed like a given. Climbing a mountain is frequently documented on social media, turning personal milestones into public spectacles that inspire others while also raising questions about authenticity.</p>
+                <select data-answer="3"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph D</span>
+                <p>The pursuit of climbing mountains can sometimes lead to misplaced priorities. While seeking adventure and recognition, individuals may neglect personal relationships or responsibilities, emphasizing the need for a balanced approach to life. In addition, there is a characteristic of mountain climbing: People always prioritize recording moments at the top of the mountain, always the highest point rather than at other points. No matter how beautiful the scenery below is, it cannot compare to the appeal of the mountain top.</p>
+                <select data-answer="4"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph E</span>
+                <p><p>Engaging in extreme sports, such as mountain climbing, can forge strong bonds among participants. However, it may also create worrying connections where individuals prioritize adrenaline over safety, potentially leading to dangerous situations.</p></p>
+                <select data-answer="5"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph F</span>
+                <p>Shared experiences in challenging environments, like mountains, can deepen intimacy in relationships. Couples or friends who navigate the challenges of climbing together often find their bonds strengthened through mutual support and understanding.</p>
+                <select data-answer="6"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph G</span>
+                <p>While adventure is thrilling, there is a growing recognition of the importance of stability in life. Balancing the desire for adventure with the need for security is crucial, prompting individuals to reflect on their life choices and long-term goals.</p>
+                <select data-answer="7"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <button class="check-btn" onclick="checkAnswers('topic2')">Check Answers</button>
+        </div>
+    </div>
+
+    <!-- TOPIC 3 -->
+    <div id="topic3" class="tab-content">
+        <div class="left-panel headings-box">
+            <h3>List of Headings</h3>
+            <ul>
+                <li>1. A way of life now out date</li>
+                <li>2. Benefits for employees</li>
+                <li>3. Undesirable financial consequences</li>
+                <li>4. Unforeseen challenges for employees</li>
+                <li>5. Difficult to change old habits</li>
+                <li>6. Unfair for some people</li>
+                <li>7. Alternative solutions worth considering</li>
+            </ul>
+        </div>
+        <div class="right-panel">
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph A</span>
+                <p>For many decades, working five or even six days a week was seen as the norm. However, with modern technology, changing values, and a greater focus on work-life balance, that lifestyle is becoming less relevant. Employees and companies alike are beginning to question whether spending most of one's week at work is still necessary or productive.</p>
+                <select data-answer="1"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph B</span>
+                <p>Supporters of the four-day work week argue that it offers numerous advantages for workers. With an extra day off, employees have more time to rest, spend with family, or pursue hobbies. Studies show that many people become more focused and productive when working fewer hours, leading to better performance and increased job satisfaction.</p>
+                <select data-answer="2"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph C</span>
+                <p>Despite its appeal, a shorter work week can also lead to financial strain. Businesses may face higher costs due to hiring additional staff or adjusting pay structures. Some industries-especially those that rely on hourly workers-might struggle to maintain profit margins, potentially resulting in reduced services or even layoffs.</p>
+                <select data-answer="3"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph D</span>
+                <p>Not all employees adjust easily to a new schedule. Some may find it difficult to complete the same amount of work in fewer days, which can increase pressure and stress. In fast-paced industries, unexpected challenges may arise, such as scheduling conflicts or missed deadlines, making the transition more complicated than expected.</p>
+                <select data-answer="4"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph E</span>
+                <p>For those who have followed a traditional work schedule for years, switching to a four-day week can be uncomfortable. Old habits and routines are hard to break, and some individuals may resist change even if it's beneficial. It often takes time and support to help people adapt to a new way of working.</p>
+                <select data-answer="5"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph F</span>
+                <p>Although the four-day week sounds ideal for many, it might not be fair to everyone. For example, essential workers, healthcare staff, or those in hospitality may not have the option to reduce their hours. This could create inequality between different groups of employees and cause tension in the workplace.</p>
+                <select data-answer="6"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph G</span>
+                <p>Rather than applying a four-day week to all companies, experts suggest looking at flexible solutions. Some propose allowing employees to choose their working days, while others support shorter daily hours. These alternatives can offer similar benefits without disrupting businesses that rely on traditional schedules.</p>
+                <select data-answer="7"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <button class="check-btn" onclick="checkAnswers('topic3')">Check Answers</button>
+        </div>
+    </div>
+
+    <!-- TOPIC 4 -->
+    <div id="topic4" class="tab-content">
+        <div class="left-panel headings-box">
+            <h3>List of Headings</h3>
+            <ul>
+                <li>1. A Journey made by stages</li>
+                <li>2. A new evidence that leads to speculation</li>
+                <li>3. An alternative history of settlement</li>
+                <li>4. Lack of knowledge and skills</li>
+                <li>5. Determination of the explorers through the ages</li>
+                <li>6. Natural barrier to resettlement</li>
+                <li>7. Technology helps uncover the ocean's secret</li>
+            </ul>
+        </div>
+        <div class="right-panel">
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph A</span>
+                <p>Scientists have found evidence that humans have lived in Australia for about 65,000 years. This is different from the previous thinking that the first people only arrived in Australia a few tens of thousands of years ago. The results from the analysis of archaeological relics have given rise to many different opinions about the origin of the first people in Australia. This discovery shows that the Australian aborigines have been present and lived here for a long time.</p>
+                <select data-answer="2"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph B</span>
+                <p>Humans coming to Australia did not happen only once. In addition to the first group of people, scientists have also discovered traces of two other groups that also came here. This shows that many groups of people came to Australia in the past. However, in ancient times, it was very difficult to get to Australia because they had to cross a large ocean without modern technology like today.</p>
+                <select data-answer="6"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph C</span>
+                <p>Thanks to modern machinery, scientists have discovered a chain of small islands that form a route to Australia. Technology such as remote sensing and electronic maps helps them identify the islands and the movements of ancient people. Thanks to that, they have a better understanding of the path that their ancestors may have taken to reach Australia.</p>
+                <select data-answer="7"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph D</span>
+                <p>Ancient people may have reached Australia by passing through many small islands. Each island was a place where they stopped to rest and find food, then continued their journey. This way of moving shows that they knew how to adapt to difficult conditions to be able to live in Australia.</p>
+                <select data-answer="1"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph E</span>
+                <p>Currently, researchers cannot know for sure how many people participated in the journey to Australia. It could have been only a few dozen people, or it could have been up to thousands. Due to the lack of clear evidence, it is difficult to determine the exact number. However, future research may help find the answer.</p>
+                <select data-answer="3"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph F</span>
+                <p>Some people think that ancient people were not smart enough or skilled enough to cross the sea to Australia. They think that without modern tools, ancient people could not navigate or cross the ocean. But history has proven that humans have always been smart and can overcome many difficulties.</p>
+                <select data-answer="4"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <div class="paragraph">
+                <span class="paragraph-label">Paragraph G</span>
+                <p>From ancient times to the present, humans have always wanted to explore new places. Whether it was going to sea in ancient times or going to space today, we always find ways to overcome the limits. Ancient people may have crossed the sea because they wanted to find a better place to live. Thanks to their courage, we understand more about human history.</p>
+                <select data-answer="5"><option value="">-- Choose matching heading --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select><div class="result"></div>
+            </div>
+            <button class="check-btn" onclick="checkAnswers('topic4')">Check Answers</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTab(evt, topicName) {
+        let tabcontents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabcontents.length; i++) {
+            tabcontents[i].style.display = "none";
+            tabcontents[i].classList.remove("active");
+        }
+        let tablinks = document.getElementsByClassName("tab-btn");
+        for (let i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(topicName).style.display = "flex";
+        setTimeout(() => document.getElementById(topicName).classList.add("active"), 10);
+        evt.currentTarget.className += " active";
+        if (window.__refreshActionBar) window.__refreshActionBar();
+    }
+
+    function checkAnswers(topicId) {
+        const topicDiv = document.getElementById(topicId);
+        const selects = topicDiv.querySelectorAll('select');
+        let allCorrect = true;
+
+        selects.forEach(select => {
+            const correctAnswer = select.getAttribute('data-answer');
+            const userAnswer = select.value;
+            const resultDiv = select.nextElementSibling;
+
+            if (userAnswer === "") {
+                resultDiv.innerHTML = "⚠ Vui lòng chọn một đáp án.";
+                resultDiv.className = "result incorrect";
+                allCorrect = false;
+            } else if (userAnswer === correctAnswer) {
+                resultDiv.innerHTML = "✔ Chính xác!";
+                resultDiv.className = "result correct";
+            } else {
+                const bank = bankFor(topicId);
+                const ht = bank[+correctAnswer - 1] ? stripNum(bank[+correctAnswer - 1]).replace(/</g, '&lt;') : correctAnswer;
+                resultDiv.innerHTML = "✘ Sai. Đáp án đúng là: <b>" + ht + "</b>";
+                resultDiv.className = "result incorrect";
+                allCorrect = false;
+            }
+        });
+
+        if(allCorrect && selects.length > 0) {
+            setTimeout(() => alert("Chúc mừng! Bạn đã trả lời đúng toàn bộ đoạn văn trong chủ đề này!"), 200);
+        }
+    }
+
+    /* ===== Highlight + Vocab + Shuffle ===== */
+    const HL_KEY = 'aptis_hl_v1', VOCAB_KEY = 'aptis_vocab_v1';
+    const loadJSON = (k, fb) => { try { return JSON.parse(localStorage.getItem(k)) || fb; } catch (e) { return fb; } };
+    const saveJSON = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+    let HL = loadJSON(HL_KEY, {}), VOCAB = loadJSON(VOCAB_KEY, []);
+    let lastFocus = null, pendingWord = null, pendingCtx = null;
+
+    // Tag paragraphs with stable ids (topic + letter)
+    document.querySelectorAll('.tab-content').forEach(topic => {
+        topic.querySelectorAll('.paragraph').forEach(p => {
+            const label = (p.querySelector('.paragraph-label') || {}).textContent || '';
+            p.dataset.topic = topic.id;
+            p.dataset.para = (label.replace('Paragraph', '').trim() || Math.random().toString(36).slice(2));
+        });
+    });
+
+    // Wrap all occurrences of needle inside <p> (skip existing marks)
+    function wrapOccurrences(pEl, needle) {
+        const p = pEl.querySelector('p');
+        const walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT, {
+            acceptNode: n => n.parentNode.tagName === 'MARK' ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+        });
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        nodes.forEach(node => {
+            let idx, frag = document.createDocumentFragment(), last = 0, text = node.textContent, found = false;
+            const low = text.toLowerCase(), key = needle.toLowerCase();
+            while ((idx = low.indexOf(key, last)) !== -1) {
+                found = true;
+                frag.appendChild(document.createTextNode(text.slice(last, idx)));
+                const m = document.createElement('mark');
+                m.className = 'hl';
+                m.title = 'Nhấn để bỏ đánh dấu';
+                m.textContent = text.substr(idx, needle.length);
+                frag.appendChild(m);
+                last = idx + needle.length;
+            }
+            if (found) {
+                frag.appendChild(document.createTextNode(text.slice(last)));
+                node.parentNode.replaceChild(frag, node);
+            }
+        });
+    }
+
+    function applyHighlights() {
+        Object.keys(HL).forEach(tid => {
+            Object.keys(HL[tid]).forEach(para => {
+                const pEl = document.querySelector('.paragraph[data-topic="' + tid + '"][data-para="' + para + '"]');
+                if (!pEl) return;
+                HL[tid][para].forEach(t => wrapOccurrences(pEl, t));
+            });
+        });
+    }
+
+    function addHighlight(topic, para, text) {
+        HL[topic] = HL[topic] || {};
+        HL[topic][para] = HL[topic][para] || [];
+        if (HL[topic][para].indexOf(text) === -1) HL[topic][para].push(text);
+        saveJSON(HL_KEY, HL);
+        const pEl = document.querySelector('.paragraph[data-topic="' + topic + '"][data-para="' + para + '"]');
+        if (pEl) wrapOccurrences(pEl, text);
+    }
+
+    // Click a highlight to remove it
+    document.addEventListener('click', e => {
+        if (e.target.tagName === 'MARK' && e.target.classList.contains('hl')) {
+            const pEl = e.target.closest('.paragraph');
+            const text = e.target.textContent;
+            pEl.querySelectorAll('mark.hl').forEach(m => {
+                if (m.textContent === text) m.replaceWith(document.createTextNode(m.textContent));
+            });
+            pEl.querySelector('p').normalize();
+            const t = HL[pEl.dataset.topic], arr = t && t[pEl.dataset.para];
+            if (arr) {
+                const i = arr.indexOf(text);
+                if (i !== -1) arr.splice(i, 1);
+                saveJSON(HL_KEY, HL);
+            }
+        }
+    });
+
+    /* ----- Paraphrase heading banks (verified against source) ----- */
+    const PARA_BANKS = {
+        topic1: ["1. Breaking Barriers in Ancient mathematics", "2. Pioneering computer science", "3. Advancing space exploration", "4. Revolutionizing geometry and dynamics", "5. Linking symmetry and physics", "6. Promoting diversity in STEM", "7. Overcoming educational restrictions"],
+        topic2: ["1. Redefining the concept of a mountain", "2. The unique feeling of achievement", "3. Public recognition of accomplishments", "4. The mistake of misplaced priorities", "5. A concerning connection", "6. A close relationship", "7. Focusing on stability"],
+        topic3: ["1. A traditional way of life that is now outdated", "2. Key benefits for employees", "3. Undesirable financial consequences for businesses.", "4. Unforeseen challenges faced by employees", "5. Difficulty in changing long-standing habits", "6. Why it may feel unfair for certain people.", "7. Alternative solutions worth considering carefully"]
+    };
+    const PARA_KEY = 'aptis_para_v1';
+    let PARA_MODE = loadJSON(PARA_KEY, {});
+    const ORIG_BANKS = {};
+    document.querySelectorAll('.tab-content').forEach(t => {
+        ORIG_BANKS[t.id] = Array.from(t.querySelectorAll('.headings-box li')).map(li => li.textContent.trim());
+    });
+    function stripNum(h) { return String(h).replace(/^\d+\.\s*/, ''); }
+    function bankFor(tid) { return PARA_MODE[tid] ? PARA_BANKS[tid] : ORIG_BANKS[tid]; }
+    function buildOptions(tid) {
+        const bank = bankFor(tid);
+        if (!bank) return;
+        document.querySelectorAll('#' + tid + ' .paragraph select').forEach(sel => {
+            const cur = sel.value;
+            const order = bank.map((h, i) => i);
+            for (let i = order.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const t = order[i]; order[i] = order[j]; order[j] = t;
+            }
+            sel.innerHTML = '<option value="">-- Choose matching heading --</option>' + order.map(i =>
+                '<option value="' + (i + 1) + '"' + (String(i + 1) === cur ? ' selected' : '') + '>' + stripNum(bank[i]).replace(/</g, '&lt;') + '</option>'
+            ).join('');
+        });
+    }
+    const PARA_NOTES = {
+        topic1: "⚠ Bản paraphrase do khóa học cung cấp: chỉ câu 6 khớp rõ với đoạn văn (F), các câu còn lại không khớp nội dung 7 đoạn trên — nên hỏi lại giáo viên trước khi học thuộc."
+    };
+    function shuffledIdx(n) {
+        const order = Array.from({ length: n }, (_, i) => i);
+        for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = order[i]; order[i] = order[j]; order[j] = t;
+        }
+        return order;
+    }
+    function applyBank(tid) {
+        const box = document.querySelector('#' + tid + ' .headings-box');
+        const lis = box.querySelectorAll('li');
+        const bank = PARA_MODE[tid] ? PARA_BANKS[tid] : ORIG_BANKS[tid];
+        const dispOrder = shuffledIdx(lis.length);
+        lis.forEach((li, j) => { const h = bank[dispOrder[j]]; if (h) li.textContent = stripNum(h); });
+        buildOptions(tid);
+        let note = box.querySelector('.para-note');
+        if (PARA_MODE[tid] && PARA_NOTES[tid]) {
+            if (!note) { note = document.createElement('div'); note.className = 'para-note'; box.appendChild(note); }
+            note.textContent = PARA_NOTES[tid];
+        } else if (note) note.remove();
+    }
+
+    // Floating toolbar on text selection
+    const toolbar = document.createElement('div');
+    toolbar.id = 'sel-toolbar';
+    toolbar.innerHTML = '<button class="tb-hl">🖍 Đánh dấu</button><button class="tb-vocab">📝 + Từ vựng</button>';
+    document.body.appendChild(toolbar);
+    const hideToolbar = () => { toolbar.style.display = 'none'; };
+    const btnHl = toolbar.querySelector('.tb-hl'), btnVocab = toolbar.querySelector('.tb-vocab');
+
+    function selectionInParagraph() {
+        const sel = window.getSelection();
+        if (!sel.rangeCount || sel.isCollapsed) return null;
+        const text = sel.toString().trim();
+        if (!text) return null;
+        const anchorP = sel.anchorNode.parentElement.closest('.paragraph');
+        if (!anchorP || !anchorP.querySelector('p').contains(sel.anchorNode)) return null;
+        return { sel, text, pEl: anchorP };
+    }
+
+    function maybeShowToolbar() {
+        const ctx = selectionInParagraph();
+        if (!ctx) { hideToolbar(); return; }
+        const rect = ctx.sel.getRangeAt(0).getBoundingClientRect();
+        toolbar.style.display = 'flex';
+        const top = Math.max(8, rect.top - toolbar.offsetHeight - 10);
+        toolbar.style.top = top + 'px';
+        toolbar.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - toolbar.offsetWidth - 8)) + 'px';
+        toolbar._ctx = ctx;
+    }
+    document.addEventListener('mouseup', e => {
+        if (toolbar.contains(e.target)) return;
+        setTimeout(maybeShowToolbar, 10);
+    });
+    document.addEventListener('touchend', () => setTimeout(maybeShowToolbar, 50));
+    document.addEventListener('scroll', hideToolbar, true);
+
+    btnHl.addEventListener('click', () => {
+        const ctx = toolbar._ctx;
+        if (!ctx) return;
+        addHighlight(ctx.pEl.dataset.topic, ctx.pEl.dataset.para, ctx.text);
+        window.getSelection().removeAllRanges();
+        hideToolbar();
+    });
+
+    /* ----- Vocab modal + panel ----- */
+    const overlay = document.createElement('div');
+    overlay.id = 'vocab-modal-overlay';
+    overlay.innerHTML = '<div id="vocab-modal" role="dialog" aria-modal="true" aria-labelledby="vm-title">'
+        + '<h3 id="vm-title">📝 Thêm từ vựng</h3><div class="vm-word" id="vm-word"></div>'
+        + '<label for="vm-input">Nghĩa tiếng Việt:</label>'
+        + '<input id="vm-input" type="text" placeholder="Nhập nghĩa của từ..." autocomplete="off">'
+        + '<div class="vm-row"><button class="vm-save">Lưu</button><button class="vm-cancel">Hủy</button></div></div>';
+    document.body.appendChild(overlay);
+    const vmInput = overlay.querySelector('#vm-input');
+    const closeModal = () => {
+        overlay.classList.remove('open');
+        if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+    };
+    overlay.querySelector('.vm-cancel').addEventListener('click', closeModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    overlay.querySelector('.vm-save').addEventListener('click', () => {
+        const meaning = vmInput.value.trim();
+        if (!meaning) { vmInput.focus(); return; }
+        VOCAB.push({ w: pendingWord, m: meaning, t: pendingCtx });
+        saveJSON(VOCAB_KEY, VOCAB);
+        renderVocab();
+        vmInput.value = '';
+        closeModal();
+        window.getSelection().removeAllRanges();
+        hideToolbar();
+    });
+    vmInput.addEventListener('keydown', e => { if (e.key === 'Enter') overlay.querySelector('.vm-save').click(); });
+
+    btnVocab.addEventListener('click', () => {
+        const ctx = toolbar._ctx;
+        if (!ctx) return;
+        pendingWord = ctx.text.length > 60 ? ctx.text.slice(0, 60) : ctx.text;
+        pendingCtx = ctx.pEl.dataset.topic + '-' + ctx.pEl.dataset.para;
+        lastFocus = document.activeElement;
+        overlay.querySelector('#vm-word').textContent = pendingWord;
+        vmInput.value = '';
+        overlay.classList.add('open');
+        vmInput.focus();
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeModal(); hideToolbar(); }
+    });
+
+    /* ----- Views: practice / vocab / docs ----- */
+    const container = document.querySelector('.container');
+    const practiceView = document.createElement('div');
+    practiceView.id = 'practice-view';
+    Array.from(container.children).forEach(ch => practiceView.appendChild(ch));
+    container.appendChild(practiceView);
+    const vocabView = document.createElement('div');
+    vocabView.id = 'vocab-view';
+    vocabView.style.display = 'none';
+    vocabView.innerHTML = '<h3>📚 Quản lý từ vựng <span id="vv-count"></span></h3>'
+        + '<div class="vv-controls"><input class="vv-search" id="vv-search" type="search" placeholder="🔍 Tìm từ hoặc nghĩa..." aria-label="Tìm từ vựng">'
+        + '<select class="vv-filter" id="vv-filter" aria-label="Lọc theo chủ đề"></select>'
+        + '<button class="vv-btn" id="vv-export">⬇ Xuất .txt</button>'
+        + '<button class="vv-btn vv-clear" id="vv-clear">Xóa hết</button></div>'
+        + '<div id="vocab-list"></div>';
+    const docsView = document.createElement('div');
+    docsView.id = 'docs-view';
+    docsView.style.display = 'none';
+    docsView.innerHTML = '<div id="docs-toolbar"><button id="docs-print">🖨 In tất cả tài liệu</button></div><div id="docs-list"></div>';
+    container.appendChild(vocabView);
+    container.appendChild(docsView);
+
+    document.querySelectorAll('#main-nav .nav-btn').forEach(b => b.addEventListener('click', () => {
+        document.querySelectorAll('#main-nav .nav-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        const v = b.dataset.view;
+        practiceView.style.display = v === 'practice' ? '' : 'none';
+        vocabView.style.display = v === 'vocab' ? '' : 'none';
+        docsView.style.display = v === 'docs' ? '' : 'none';
+        document.querySelector('#action-bar').style.display = v === 'practice' ? '' : 'none';
+        if (v === 'vocab') renderVocab();
+        if (v === 'docs') renderDocs();
+    }));
+
+    const esc = s => String(s).replace(/</g, '&lt;');
+    let vvQuery = '', vvTopic = '', vvKnownTopics = '';
+    vocabView.querySelector('#vv-search').addEventListener('input', e => { vvQuery = e.target.value.toLowerCase(); renderVocabList(); });
+    vocabView.querySelector('#vv-filter').addEventListener('change', e => { vvTopic = e.target.value; renderVocabList(); });
+    vocabView.querySelector('#vv-export').addEventListener('click', () => {
+        if (!VOCAB.length) { alert('Chưa có từ vựng nào để xuất.'); return; }
+        downloadTxt('tu-vung-aptis.txt', VOCAB.map(v => v.w + ' = ' + v.m + ' [' + v.t + ']').join('\n'));
+    });
+    vocabView.querySelector('#vv-clear').addEventListener('click', () => {
+        if (VOCAB.length && confirm('Xóa toàn bộ từ vựng đã lưu?')) {
+            VOCAB = [];
+            saveJSON(VOCAB_KEY, VOCAB);
+            renderVocab();
+        }
+    });
+    vocabView.addEventListener('click', e => {
+        if (e.target.classList.contains('vw-del')) {
+            VOCAB.splice(+e.target.dataset.i, 1);
+            saveJSON(VOCAB_KEY, VOCAB);
+            renderVocab();
+        }
+    });
+
+    function renderVocab() {
+        document.querySelector('#nav-vocab-count').textContent = '(' + VOCAB.length + ')';
+        vocabView.querySelector('#vv-count').textContent = '(' + VOCAB.length + ')';
+        const topics = Array.from(new Set(VOCAB.map(v => v.t))).sort();
+        if (topics.join('|') !== vvKnownTopics) {
+            vvKnownTopics = topics.join('|');
+            const sel = vocabView.querySelector('#vv-filter');
+            sel.innerHTML = '<option value="">Tất cả chủ đề</option>'
+                + topics.map(t => '<option value="' + esc(t) + '">Chủ đề ' + esc(t) + '</option>').join('');
+            vvTopic = '';
+        }
+        renderVocabList();
+    }
+    function renderVocabList() {
+        const box = vocabView.querySelector('#vocab-list');
+        const rows = VOCAB.map((v, i) => ({ v, i })).filter(({ v }) =>
+            (!vvTopic || v.t === vvTopic) &&
+            (!vvQuery || v.w.toLowerCase().includes(vvQuery) || v.m.toLowerCase().includes(vvQuery)));
+        if (!VOCAB.length) {
+            box.innerHTML = '<div class="vw-empty">Chưa có từ nào.<br>Bôi đen một từ trong đoạn văn → nhấn "📝 + Từ vựng" để thêm từ mới tại đây.</div>';
+        } else if (!rows.length) {
+            box.innerHTML = '<div class="vw-empty" role="status">Không tìm thấy từ nào khớp.</div>';
+        } else {
+            box.innerHTML = '<ul>' + rows.map(({ v, i }) =>
+                '<li><span class="vw-word">' + esc(v.w) + '</span>'
+                + '<span>' + esc(v.m) + '</span>'
+                + '<span class="vw-topic">' + esc(v.t) + '</span>'
+                + '<button class="vw-del" data-i="' + i + '" aria-label="Xóa từ ' + esc(v.w).replace(/"/g, '') + '">✕</button></li>'
+            ).join('') + '</ul>';
+        }
+    }
+
+    /* ----- Documents auto-generated from topics ----- */
+    function topicTitle(tid) {
+        const btn = document.querySelector('.tab-btn[onclick*="' + tid + '"]');
+        return btn ? btn.textContent.trim() : tid;
+    }
+    function collectDocs() {
+        return Array.from(document.querySelectorAll('.tab-content')).map(t => {
+            const headings = ORIG_BANKS[t.id].slice();
+            const paras = Array.from(t.querySelectorAll('.paragraph')).map(p => {
+                const ans = p.querySelector('select').dataset.answer;
+                const head = headings.find(h => h.indexOf(ans + '.') === 0) || ('Heading ' + ans);
+                const label = (p.querySelector('.paragraph-label') || {}).textContent || '';
+                return { label: label.trim(), text: p.querySelector('p').textContent.trim(), ans, head };
+            });
+            return { id: t.id, title: topicTitle(t.id), headings, paras };
+        });
+    }
+    function docToTxt(doc) {
+        let out = doc.title.toUpperCase() + '\n' + '='.repeat(doc.title.length) + '\n\nLIST OF HEADINGS:\n'
+            + doc.headings.join('\n') + '\n';
+        doc.paras.forEach(p => {
+            out += '\n' + p.label.toUpperCase() + '\n' + p.text + '\n=> Answer: ' + p.head + '\n';
+        });
+        return out;
+    }
+    function slugify(s) {
+        return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'tai-lieu';
+    }
+    function downloadTxt(name, text) {        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    }
+    let docsCache = null;
+    function renderDocs() {
+        docsCache = collectDocs();
+        const list = docsView.querySelector('#docs-list');
+        list.innerHTML = docsCache.map((d, i) =>
+            '<article class="doc-card"><h3>📄 ' + esc(d.title) + '</h3>'
+            + '<div class="doc-meta">' + d.paras.length + ' đoạn văn · ' + d.headings.length + ' headings · có đáp án</div>'
+            + '<div class="doc-headings"><strong>List of Headings:</strong><br>' + d.headings.map(esc).join('<br>') + '</div>'
+            + d.paras.map(p => '<div class="doc-para"><strong>' + esc(p.label) + '.</strong> ' + esc(p.text)
+                + '<br><span class="doc-answer">✔ ' + esc(p.head) + '</span></div>').join('')
+            + '<button class="doc-btn doc-toggle" aria-label="Ẩn hoặc hiện đáp án">👁 Ẩn đáp án</button>'
+            + ' <button class="doc-btn" data-i="' + i + '">⬇ Tải tài liệu .txt</button></article>'
+        ).join('');
+    }
+    docsView.addEventListener('click', e => {
+        if (e.target.classList.contains('doc-toggle')) {
+            const card = e.target.closest('.doc-card');
+            card.classList.toggle('hidden-answers');
+            const hidden = card.classList.contains('hidden-answers');
+            e.target.textContent = hidden ? '🙈 Hiện đáp án' : '👁 Ẩn đáp án';
+        } else if (e.target.classList.contains('doc-btn')) {
+            const d = (docsCache || collectDocs())[+e.target.dataset.i];
+            downloadTxt(slugify(d.title) + '.txt', docToTxt(d));
+        } else if (e.target.id === 'docs-print') {
+            window.print();
+        }
+    });
+
+    /* ----- Action bar (right side): check / shuffle / origin / paraphrase ----- */
+    const originalOrder = {};
+    document.querySelectorAll('.tab-content').forEach(topic => {
+        originalOrder[topic.id] = Array.from(topic.querySelectorAll('.paragraph')).map(p => p.dataset.para);
+    });
+    const activeTopic = () => document.querySelector('.tab-content.active') || document.querySelector('.tab-content');
+    function clearResults(topic) {
+        topic.querySelectorAll('.result').forEach(r => { r.className = 'result'; r.innerHTML = ''; });
+    }
+    function shuffleTopic(topic) {
+        const right = topic.querySelector('.right-panel');
+        const items = Array.from(right.querySelectorAll('.paragraph'));
+        for (let i = items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const tmp = items[i]; items[i] = items[j]; items[j] = tmp;
+        }
+        clearResults(topic);
+        items.forEach(p => right.appendChild(p));
+        right.appendChild(right.querySelector('.check-btn'));
+        applyBank(topic.id);
+    }
+    function originTopic(topic) {
+        const right = topic.querySelector('.right-panel');
+        const map = {};
+        right.querySelectorAll('.paragraph').forEach(p => { map[p.dataset.para] = p; });
+        clearResults(topic);
+        originalOrder[topic.id].forEach(key => { if (map[key]) right.appendChild(map[key]); });
+        right.appendChild(right.querySelector('.check-btn'));
+        applyBank(topic.id);
+    }
+    const abPara = document.querySelector('#ab-para');
+    function paintPara() {
+        const t = activeTopic();
+        const has = !!PARA_BANKS[t.id];
+        abPara.style.display = has ? '' : 'none';
+        abPara.classList.toggle('on', !!PARA_MODE[t.id]);
+        abPara.querySelector('.ab-txt').textContent = PARA_MODE[t.id] ? 'Para: Bật' : 'Paraphrase';
+        abPara.title = has ? 'Bật/tắt headings paraphrase cho chủ đề này' : 'Chủ đề này chưa có bản paraphrase';
+    }
+    document.querySelector('#ab-check').addEventListener('click', () => checkAnswers(activeTopic().id));
+    document.querySelector('#ab-shuffle').addEventListener('click', () => shuffleTopic(activeTopic()));
+    document.querySelector('#ab-origin').addEventListener('click', () => originTopic(activeTopic()));
+    abPara.addEventListener('click', () => {
+        const t = activeTopic();
+        if (!PARA_BANKS[t.id]) return;
+        PARA_MODE[t.id] = !PARA_MODE[t.id];
+        saveJSON(PARA_KEY, PARA_MODE);
+        applyBank(t.id);
+        paintPara();
+    });
+    window.__refreshActionBar = paintPara;
+
+    applyHighlights();
+    renderVocab();
+    Object.keys(ORIG_BANKS).forEach(applyBank);
+    paintPara();
+</script>
+</body>
+</html>
