@@ -919,6 +919,14 @@
             });
         });
     }
+    // ponytail: reset chỉ xóa đáp án+kết quả, bôi vàng (HL store) phải còn; reapply phòng khi DOM bị lệch
+    function reapplyTopic(tid) {
+        const store = HL[tid] || {};
+        Object.keys(store).forEach(para => {
+            const pEl = document.querySelector('.paragraph[data-topic="' + tid + '"][data-para="' + para + '"]');
+            if (pEl) (store[para] || []).forEach(txt => wrapOccurrences(pEl, txt));
+        });
+    }
     function resetTopic(tid, ask) {
         if (ask === undefined) ask = true;
         if (ask && !confirm('Xóa hết đáp án + kết quả của đề này để làm lại?')) return;
@@ -929,6 +937,7 @@
         if (!t) return;
         t.querySelectorAll('.paragraph select').forEach(s => { s.value = ''; });
         clearResults(t);
+        reapplyTopic(tid);
     }
     document.querySelectorAll('.paragraph select').forEach(sel => sel.addEventListener('change', () => window.__saveProg()));
     document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTimeout(() => window.__saveProg(), 50)));
